@@ -74,9 +74,8 @@ This project demonstrates the complete workflow of building a spam email classif
 
 ## Frontend Interface
 
-![Frontend Interface](readme-images/image.png)
-![Frontend Interface2](readme-images/image2.png)
-
+![Frontend Image1](https://github.com/user-attachments/assets/60657855-352c-4510-ba00-1db3e0af8ff1)
+![Frontend Image2](https://github.com/user-attachments/assets/107a1a55-d9ea-46b6-b2e2-1ee1db30e6f6)
 
 ## References
 Used dataset: [SMS Spam Collection Dataset](https://archive.ics.uci.edu/dataset/228/sms+spam+collection)

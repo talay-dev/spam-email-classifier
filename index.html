@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Mail Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://bernii.github.io/gauge.js/dist/gauge.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Spam Mail Checker</h1>
+            <p class="text-gray-600">Check if your email is spam or not</p>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+            <canvas id="spamometer"></canvas>
+        </div>
+        <div id="result" class="text-center mt-4 font-semibold"></div>
+        <div class="space-y-6">
+            <div>
+                <textarea 
+                    id="emailText" 
+                    rows="4" 
+                    class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500" 
+                    placeholder="Enter email text here..."></textarea>
+            </div>
+
+            <div class="text-center">
+                <button 
+                    onclick="checkSpam()" 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
+                    Check for Spam
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Define gauge as a global variable
+        var gauge;
+
+        // Initialize gauge when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            gauge = new Gauge(document.getElementById("spamometer")).setOptions({
+                angle: 0,
+                lineWidth: 0.44,
+                radiusScale: 1,
+                pointer: {
+                    length: 0.6,
+                    strokeWidth: 0.035,
+                    color: '#000000'
+                },
+                limitMax: false,
+                limitMin: false,
+                colorStart: '#6FADCF',
+                colorStop: '#FF4444',
+                strokeColor: '#E0E0E0',
+                generateGradient: true,
+                highDpiSupport: true,
+                percentColors: [[0.0, "#00FF00"], [0.50, "#FFFF00"], [1.0, "#FF0000"]],
+                staticLabels: {
+                    font: "10px sans-serif",
+                    labels: [0, 0.2, 0.4, 0.6, 0.8, 1.0],
+                    color: "#000000",
+                    fractionDigits: 1
+                },
+            });
+            gauge.maxValue = 1;
+            gauge.setMinValue(0);
+            gauge.set(0);
+        });
+
+        // Define checkSpam as a global function
+        async function checkSpam() {
+            const emailText = document.getElementById('emailText').value;
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('http://localhost:20000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: emailText })
+                });
+
+                const data = await response.json();
+                gauge.set(data.probability);
+
+                resultDiv.textContent = data.is_spam 
+                    ? `🚨 Spam Detected (${(data.probability * 100).toFixed(1)}% confidence)`
+                    : `✅ Not Spam (${((1 - data.probability) * 100).toFixed(1)}% confidence)`;
+                
+                resultDiv.className = `text-center mt-4 font-semibold ${data.is_spam ? 'text-red-600' : 'text-green-600'}`;
+            } catch (error) {
+                console.error(error);
+                resultDiv.textContent = '❌ Error checking spam status';
+                resultDiv.className = 'text-center mt-4 font-semibold text-red-600';
+            }
+        }
+    </script>
+</body>
+</html>
